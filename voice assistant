@@ -1,0 +1,117 @@
+import pyttsx3
+import speech_recognition as sr
+import datetime
+import webbrowser
+import requests
+import pyttsx3
+import time
+import subprocess
+import wolframalpha
+import wikipedia
+engine=pyttsx3.init('sapi5')
+voices=engine.getProperty('voices')
+engine.setProperty('voice',voices[1].id)
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+def wishme():
+        hour=datetime.datetime.now().hour
+        if hour>=0 and hour<12:
+            speak("good morning")
+        elif hour>=12 and hour<15:
+            speak("good afternoon")
+        elif hour>=15 and hour<19:
+            speak("good evening")
+        else:
+            speak("it's good to see you again")
+def takeCommand():
+    r=sr.Recognizer()
+    with sr.Microphone() as source:
+        print("listening....")
+        audio=r.listen(source)
+        try:
+            statement=r.recognize_google(audio,language='en-in')
+            print(f"{statement}\n")
+        except Exception as e:
+            speak("pardon me,please say it again")
+            return "none"
+        return statement
+speak("hi,am manju")
+wishme()
+statement=takeCommand()
+if __name__=='__main__':
+    speak("what is your name")
+    name=takeCommand().upper()
+    speak("hello"+name)
+    while True:
+        speak("tell me how can i help you now?")
+        statement=takeCommand().lower()
+        if 'no thanks' in statement:
+            break
+        if 'good bye'in statement or 'stop' in statement or 'bye' in statement:
+            speak('ok bye, take care')
+            print("good bye")
+            break
+        if 'wikipedia' in statement:
+            speak('searching wikipedia....')
+            statement= statement.replace("wikipedia","")
+            result=wikipedia.summary(statement,sentences=3)
+            speak("according to wikipedia")
+            print(result)
+            speak(result)
+        elif 'open youtube' in statement:
+            webbrowser.open_new_tab("youtube.com")
+            speak("youtube is open now")
+            time.sleep(5)
+        elif 'open google' in statement:
+            webbrowser.open_new_tab("google.com")
+            speak("google is open now")
+            time.sleep(5)
+        elif 'open gmail' in statement:
+            webbrowser.open_new_tab("gmail.com")
+            speak("gmail is open now")
+            time.sleep(5)
+        elif 'time' in statement:
+            strtime=datetime.datetime.now().strftime("%H:%M:%S")
+            speak(f"the time is {strtime}")
+        elif 'news'in statement:
+            news=webbrowser.open_new_tab("timesofindia.indiatimes.com/home/headlines")
+            speak("here is today's headlines from times of india,enjoy reading")
+        elif 'search' in statement:
+            statement=statement.replace("search","")
+            webbrowser.open_new_tab(statement)
+            time.sleep(5)
+        elif 'ask' in statement:
+            speak("i can answer to computational and geographical question")
+            question=takeCommand()
+            app_id="HEUHPY-AE374AXK68"
+            client=wolframalpha.Client('HEUHPY-AE374AXK68')
+            res=client.query(question)
+            answer=next(res.results).text
+            speak(answer)
+            print(answer)
+        if 'who are you' in statement:
+            speak("i am manju version 1 point o, your personal voice assistant")
+        if 'what can you do' in statement:
+            speak("i am programmed to minor tasks like opening youtube,google,gmail and stackoverflow, predict time,search wikipedia,predict weather in different cities,get top headlines fron times of india and yo can ask me computational or geographical questions too! ")    
+        elif 'who made you' in statement or 'who created you' in statement:
+            speak("i was built by ms.lavanya")
+            print("i was built by ms.lavanya")
+        elif 'weather' in statement:
+            api_key="HEUHPY-9WGQ6THQ5K"
+            base_url="http://api.openweathermap.org/data/2.5/weather?"
+            speak("what is the city name?")
+            city_name=takeCommand()
+            complete_url=base_url+"appid="+api_key+"&q="+city_name
+            response=requests.get(complete_url)
+            x=response.json()
+            if x["cod"]!= "404":
+                y= x["main"]
+                current_temperature= y["temp"]
+                current_humidity= y["humidity"]
+                z=x["weather"]
+                weather_description=z[0]["description"]
+                speak("temperature in kelvin is"+str(current_temperature)+"\n huidity in percentage is"+str(current_humidity)+"description"+str(weather_description))
+        elif 'log off' in statement:
+            speak("ok,you pc will log off in 10 seconds make sure you exit from all applications")
+            subprocess.call(["shutdown","/l"])
